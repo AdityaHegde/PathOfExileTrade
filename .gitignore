@@ -54,5 +54,6 @@ coverage
 docs
 .nyc_output
 .rpt2_cache
+data
 
 ScreepsAutocomplete

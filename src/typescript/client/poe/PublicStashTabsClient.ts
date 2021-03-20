@@ -1,7 +1,10 @@
-import { PublicStashTabs } from "@model/poe-api/PublicStashTabs";
 import got from "got";
-import { InternalLogger } from "../Logger";
-import { RateLimiter } from "./RateLimiter";
+import exitHook from "exit-hook";
+import _ from "lodash";
+
+import { PublicStashTabs } from "src/typescript/model/poe-api/PublicStashTabs";
+import { RateLimiter } from "@client/RateLimiter";
+import { InternalLogger } from "@typescript/Logger";
 
 const PUBLIC_STASH_TABS_API = "http://api.pathofexile.com/public-stash-tabs";
 
@@ -10,18 +13,23 @@ export class PublicStashTabsClient {
   private rateLimiter = new RateLimiter(2);
 
   private initialId: string;
-  private newStashTabsCallback: (newPublicStashTabs: PublicStashTabs) => void;
+  private newStashTabsCallback:(newPublicStashTabs: PublicStashTabs) => void;
 
   constructor(
     initialId: string,
     newStashTabsCallback: (newPublicStashTabs: PublicStashTabs) => void,
   ) {
-    this.initialId = initialId;
+    this.initialId = _.isString(initialId) && initialId !== "" ? initialId : undefined;
     this.newStashTabsCallback = newStashTabsCallback;
   }
 
   public async start() {
     let nextId = this.initialId;
+
+    exitHook(() => {
+      console.log(`\n${nextId}\n`);
+    });
+
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await this.rateLimiter.limit();

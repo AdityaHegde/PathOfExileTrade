@@ -4,6 +4,11 @@
     "types": ["node"],
     "module": "commonjs",
     "moduleResolution": "node",
+    "jsx": "react",
+    "lib": [
+      "dom", "es2020"
+    ],
+
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
@@ -12,7 +17,9 @@
 
     "baseUrl": ".",
     "paths": {
-      "@model/*": ["src/model/*"]
+      "@model/*": ["src/typescript/model/*"],
+      "@client/*": ["src/typescript/client/*"],
+      "@typescript/*": ["src/typescript/*"]
     }
   },
   "include": [

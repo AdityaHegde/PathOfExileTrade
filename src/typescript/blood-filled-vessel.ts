@@ -1,14 +1,14 @@
-import { Item } from "@model/poe-api/Item";
-import { PublicStashTabs } from "@model/poe-api/PublicStashTabs";
-import { StashTab } from "@model/poe-api/StashTab";
-import { PublicStashTabsClient } from "./client/PublicStashTabsClient";
+import { Item } from "src/typescript/model/poe-api/Item";
+import { PublicStashTabs } from "src/typescript/model/poe-api/PublicStashTabs";
+import { StashTab } from "src/typescript/model/poe-api/StashTab";
+import { PublicStashTabsClient } from "./client/poe/PublicStashTabsClient";
 
 const Interest = new Set([
-  "Kitava, The Destroyer",
+  // "Kitava, The Destroyer",
 
-  "Nassar, Lion of the Seas",
-  "Ambrius, Legion Slayer",
-  "Varhesh, Shimmering Aberration",
+  // "Nassar, Lion of the Seas",
+  // "Ambrius, Legion Slayer",
+  // "Varhesh, Shimmering Aberration",
 
   "Stone of the Currents",
   "Gisale, Thought Thief",
@@ -18,10 +18,10 @@ const Interest = new Set([
   "The Brittle Emperor",
   "Stalker of the Endless Dunes",
 
-  "Gorulis, Will-Thief",
-  "Armala, the Widow",
-  "Visceris",
-  "Queen of the Great Tangle",
+  // "Gorulis, Will-Thief",
+  // "Armala, the Widow",
+  // "Visceris",
+  // "Queen of the Great Tangle",
 ]);
 
 function checkBloodFilledVessel(stash: StashTab, item: Item) {
@@ -36,7 +36,7 @@ function checkBloodFilledVessel(stash: StashTab, item: Item) {
 }
 
 const stashTabsClient = new PublicStashTabsClient(
-  "1090659386-1098552584-1058944583-1187446950-1139423730",
+  process.argv[2],
   (newPublicStashTabs: PublicStashTabs) => {
     newPublicStashTabs.stashes.forEach((stash) => {
       if (stash.public && stash.league === "Ritual") {
