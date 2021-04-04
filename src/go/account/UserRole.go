@@ -1,4 +1,4 @@
-package accountmodel
+package account
 
 // UserRole is exported
 type UserRole int

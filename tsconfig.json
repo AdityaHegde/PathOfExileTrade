@@ -18,7 +18,7 @@
     "baseUrl": ".",
     "paths": {
       "@model/*": ["src/typescript/model/*"],
-      "@client/*": ["src/typescript/client/*"],
+      "@component/*": ["src/typescript/component/*"],
       "@typescript/*": ["src/typescript/*"]
     }
   },

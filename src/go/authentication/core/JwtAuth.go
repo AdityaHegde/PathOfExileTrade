@@ -2,17 +2,19 @@ package authcore
 
 import (
 	"crypto/rand"
-  "crypto/rsa"
+	"crypto/rsa"
 	"errors"
 	"fmt"
-	accountmodel "github.com/AdityaHegde/PathOfExileTrade/model/account"
+	"github.com/AdityaHegde/PathOfExileTrade/account"
 	"github.com/lestrrat-go/jwx/jwa"
 	"github.com/lestrrat-go/jwx/jwt"
 )
 
 const UserNameKey = "UserName"
 
+// JwtAuth is exported
 type JwtAuth struct {
+	Auth
 	key *rsa.PrivateKey
 }
 
@@ -26,7 +28,7 @@ func (jwtAuth *JwtAuth) Init() error {
 	return nil
 }
 
-func (jwtAuth *JwtAuth) Generate(user *accountmodel.User) (string, error) {
+func (jwtAuth *JwtAuth) Generate(user *account.User) (string, error) {
 	token := jwt.New()
 
 	setErr := token.Set(UserNameKey, user.Name)

@@ -3,9 +3,9 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/AdityaHegde/PathOfExileTrade/account"
 	"strconv"
 
-	accountmodel "github.com/AdityaHegde/PathOfExileTrade/model/account"
 	servicemodel "github.com/AdityaHegde/PathOfExileTrade/model/service"
 	"github.com/go-redis/redis/v8"
 )
@@ -13,7 +13,7 @@ import (
 var ctx = context.Background()
 
 // AddToQueue is exported
-func AddToQueue(rdb *redis.Client, listingType *servicemodel.ListingType, user *accountmodel.User) {
+func AddToQueue(rdb *redis.Client, listingType *servicemodel.ListingType, user *account.User) {
 	if userAlreadyQueued(rdb, listingType, user) {
 		return
 	}
@@ -34,7 +34,7 @@ func AddToQueue(rdb *redis.Client, listingType *servicemodel.ListingType, user *
 }
 
 // RemoveFromQueue is exported
-func RemoveFromQueue(rdb *redis.Client, listingType *servicemodel.ListingType, user *accountmodel.User) {
+func RemoveFromQueue(rdb *redis.Client, listingType *servicemodel.ListingType, user *account.User) {
 	_, lRemErr := rdb.LRem(ctx, listingType.Name, 1, user.Name).Result()
 	_, sRemErr := rdb.SRem(ctx, listingType.Name, user.Name).Result()
 
@@ -61,7 +61,7 @@ func ClearListing(rdb *redis.Client, listing *servicemodel.Listing) {
 	rdb.LTrim(ctx, listingStrID, 1, 0)
 }
 
-func userAlreadyQueued(rdb *redis.Client, listingType *servicemodel.ListingType, user *accountmodel.User) bool {
+func userAlreadyQueued(rdb *redis.Client, listingType *servicemodel.ListingType, user *account.User) bool {
 	exists, err := rdb.SIsMember(ctx, listingType.Name, user.Name).Result()
 
 	return err == redis.Nil || exists

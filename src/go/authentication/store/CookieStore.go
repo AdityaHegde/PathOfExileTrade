@@ -7,6 +7,7 @@ import (
 
 const CookieName = "jwt_auth"
 
+// CookieStore is exported
 type CookieStore struct {
 }
 
@@ -21,10 +22,18 @@ func (cookie *CookieStore) Get(req *http.Request) (string, error) {
 }
 
 func (cookie *CookieStore) Set(res http.ResponseWriter, value string) {
+	setCookie(res, value, time.Now().Add(120 * time.Minute))
+}
+
+func (cookie *CookieStore) Unset(res http.ResponseWriter) {
+	setCookie(res, "", time.Now().Add(-120 * time.Minute))
+}
+
+func setCookie(res http.ResponseWriter, value string, expiry time.Time) {
 	http.SetCookie(res, &http.Cookie{
 		Name:    CookieName,
 		Value:   value,
-		Expires: time.Now().Add(120 * time.Minute),
+		Expires: expiry,
 		Domain:  "",
 		Path:    "/",
 	})

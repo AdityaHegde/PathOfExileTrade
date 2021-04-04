@@ -1,17 +1,22 @@
-package accountmodel
+package account
 
 import (
+	"context"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"net/http"
 )
 
 // User is extended
 type User struct {
-	Name     string `json:"name" gorm:"primaryKey"`
-	Email    string `json:"email" gorm:"unique"`
-	Password string `json:"password"`
-	Roles []UserRole `json:"roles"`
+	Name     string `jsonapi:"primary,users" gorm:"primaryKey"`
+	Email    string `jsonapi:"attr,email" gorm:"unique"`
+	Password string `jsonapi:"attr,password"`
+	Role     UserRole    `jsonapi:"attr,role"`
 }
+
+// UserContextKey is exported
+const UserContextKey = "user"
 
 // CreateUserRecord creates a user record in the database
 func (user *User) CreateUserRecord(db *gorm.DB) error {
@@ -43,4 +48,8 @@ func (user *User) CheckPassword(providedPassword string) error {
 	}
 
 	return nil
+}
+
+func (user *User) GetRequestWithUser(req *http.Request) *http.Request {
+	return req.WithContext(context.WithValue(req.Context(), UserContextKey, user))
 }

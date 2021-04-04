@@ -1,109 +1,127 @@
 package authentication
 
 import (
-  "context"
+  "fmt"
+  "github.com/AdityaHegde/PathOfExileTrade/account"
   authcore "github.com/AdityaHegde/PathOfExileTrade/authentication/core"
   authstore "github.com/AdityaHegde/PathOfExileTrade/authentication/store"
-  accountmodel "github.com/AdityaHegde/PathOfExileTrade/model/account"
+  "github.com/google/jsonapi"
   "gorm.io/gorm"
   "net/http"
 )
 
 const UserParam = "user"
 const PasswordParam = "pwd"
-// UserContextKey is exported
-const UserContextKey = "user"
 
 // AuthMiddleware is exported
 type AuthMiddleware struct {
-  store authstore.AuthStore
-  auth authcore.Auth
-  db *gorm.DB
+  Store authstore.AuthStore
+  Auth authcore.Auth
+  Db   *gorm.DB
+}
+
+func (authMiddleware *AuthMiddleware) Init() error {
+  return authMiddleware.Auth.Init()
 }
 
 func (authMiddleware *AuthMiddleware) Validate(next http.Handler) http.Handler {
   return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-    userName, err := authMiddleware.store.Get(req)
+    jwt, err := authMiddleware.Store.Get(req)
     if err != nil {
+      fmt.Println(err)
+      http.Error(res, "Forbidden", http.StatusForbidden)
+      return
+    }
+
+    userName, validateErr := authMiddleware.Auth.Validate(jwt)
+    if validateErr !=nil {
+      http.Error(res, "Forbidden", http.StatusForbidden)
+      return
+    }
+
+    var user = account.User{
+      Name: userName,
+    }
+    findResp := authMiddleware.Db.Find(&user)
+
+    if findResp.Error != nil || findResp.RowsAffected == 0 {
+      fmt.Println(findResp.Error)
       http.Error(res, "Forbidden", http.StatusForbidden)
     } else {
-      var user = accountmodel.User{
-        Name: userName,
-      }
-      findResp := authMiddleware.db.Find(&user)
-
-      if findResp.Error != nil || findResp.RowsAffected == 0 {
-        http.Error(res, "Forbidden", http.StatusForbidden)
-      } else {
-        next.ServeHTTP(res, req.WithContext(context.WithValue(req.Context(), UserContextKey, user)))
-      }
+      next.ServeHTTP(res, user.GetRequestWithUser(req))
     }
   })
 }
 
 func (authMiddleware *AuthMiddleware) Login(next http.Handler) http.Handler {
   return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-    var user = &accountmodel.User{
-      Name: req.URL.Query()[UserParam][0],
+    var user = new(account.User)
+    parseErr := jsonapi.UnmarshalPayload(req.Body, user)
+    if parseErr != nil {
+      fmt.Println(parseErr)
+      http.Error(res, "Error", http.StatusInternalServerError)
+      return
     }
-    findResp := authMiddleware.db.Find(user)
 
+    passwordFromReq := user.Password
+
+    findResp := authMiddleware.Db.Find(user)
     if findResp.Error != nil || findResp.RowsAffected == 0 {
+      fmt.Println(findResp.Error)
       http.Error(res, "Forbidden", http.StatusForbidden)
       return
     }
 
-    checkPwdErr := user.CheckPassword(req.URL.Query()[PasswordParam][0])
+    checkPwdErr := user.CheckPassword(passwordFromReq)
     if checkPwdErr != nil {
+      fmt.Println(checkPwdErr)
       http.Error(res, "Forbidden", http.StatusForbidden)
       return
     }
 
-    next.ServeHTTP(res, req.WithContext(context.WithValue(req.Context(), UserContextKey, user)))
+    authValue, authErr := authMiddleware.Auth.Generate(user)
+    if authErr != nil {
+      fmt.Println(authErr)
+      http.Error(res, "Error", http.StatusInternalServerError)
+      return
+    }
+    authMiddleware.Store.Set(res, authValue)
+
+    next.ServeHTTP(res, user.GetRequestWithUser(req))
   })
 }
 
 func (authMiddleware *AuthMiddleware) Signup(next http.Handler) http.Handler {
   return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-    var user = &accountmodel.User{
-      Name: req.URL.Query()[UserParam][0],
-      Roles: []accountmodel.UserRole{accountmodel.Consumer},
-    }
-    hashErr := user.HashPassword(req.URL.Query()[PasswordParam][0])
+    user := req.Context().Value(account.UserContextKey).(account.User)
 
-    if hashErr.Error != nil {
-      http.Error(res, "Error", http.StatusInternalServerError)
-      return
-    }
-
-    authValue, authErr := authMiddleware.auth.Generate(user)
+    authValue, authErr := authMiddleware.Auth.Generate(&user)
     if authErr != nil {
+      fmt.Println(authErr)
       http.Error(res, "Error", http.StatusInternalServerError)
       return
     }
-    authMiddleware.store.Set(res, authValue)
+    authMiddleware.Store.Set(res, authValue)
 
-    createErr := user.CreateUserRecord(authMiddleware.db)
-    if createErr != nil {
-      http.Error(res, "Error", http.StatusInternalServerError)
-      return
-    }
-
-    next.ServeHTTP(res, req.WithContext(context.WithValue(req.Context(), "user", user)))
+    next.ServeHTTP(res, user.GetRequestWithUser(req))
   })
 }
 
-func (authMiddleware *AuthMiddleware) Restrict(next http.Handler, restrictedRole accountmodel.UserRole) http.Handler {
+func (authMiddleware *AuthMiddleware) Logout(next http.Handler) http.Handler {
   return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-    user := req.Context().Value(UserContextKey).(accountmodel.User)
+    authMiddleware.Store.Unset(res)
+    next.ServeHTTP(res, req)
+  })
+}
 
-    for role := range user.Roles {
-      if role == int(restrictedRole) {
-        next.ServeHTTP(res, req)
-        return
-      }
+func (authMiddleware *AuthMiddleware) Restrict(next http.Handler, restrictedRole account.UserRole) http.Handler {
+  return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+    user := req.Context().Value(account.UserContextKey).(account.User)
+
+    if user.Role <= restrictedRole {
+      next.ServeHTTP(res, req)
+    } else {
+      http.Error(res, "Forbidden", http.StatusForbidden)
     }
-
-    http.Error(res, "Forbidden", http.StatusForbidden)
   })
 }

@@ -1,16 +1,15 @@
 package servicemodel
 
 import (
-	"time"
-
-	accountmodel "github.com/AdityaHegde/PathOfExileTrade/model/account"
+  "github.com/AdityaHegde/PathOfExileTrade/account"
+  "time"
 )
 
 // Listing is exported
 type Listing struct {
 	ID              uint64 `gorm:"primaryKey;autoIncrement"`
 	UserID          string
-	User            accountmodel.User `gorm:"references:Name"`
+	User            account.User `gorm:"references:Name"`
 	ListingTypeID   string
 	ListingType     ListingType `gorm:"references:Name"`
 	Active          bool        `gorm:"index"`

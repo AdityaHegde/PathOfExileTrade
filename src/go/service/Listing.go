@@ -1,16 +1,16 @@
 package service
 
 import (
+	"github.com/AdityaHegde/PathOfExileTrade/account"
 	"time"
 
-	accountmodel "github.com/AdityaHegde/PathOfExileTrade/model/account"
 	servicemodel "github.com/AdityaHegde/PathOfExileTrade/model/service"
 	"gorm.io/gorm"
 )
 
 // CreateListing is exported
 func CreateListing(
-	db *gorm.DB, User accountmodel.User,
+	db *gorm.DB, User account.User,
 	listingType string, maxParticipants uint, count uint,
 ) (*servicemodel.Listing, error) {
 	var listing = servicemodel.Listing{

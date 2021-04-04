@@ -1,9 +1,12 @@
 package authcore
 
-import accountmodel "github.com/AdityaHegde/PathOfExileTrade/model/account"
+import (
+  "github.com/AdityaHegde/PathOfExileTrade/account"
+)
 
+// Auth is exported
 type Auth interface {
   Init() error
-  Generate(user *accountmodel.User) (string, error)
+  Generate(user *account.User) (string, error)
   Validate(payload string) (string, error)
 }
