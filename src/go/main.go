@@ -7,6 +7,7 @@ import (
 	authcore "github.com/AdityaHegde/PathOfExileTrade/authentication/core"
 	authstore "github.com/AdityaHegde/PathOfExileTrade/authentication/store"
 	"github.com/AdityaHegde/PathOfExileTrade/database"
+	"github.com/AdityaHegde/PathOfExileTrade/service"
 	"net/http"
 
 	"github.com/AdityaHegde/PathOfExileTrade/server"
@@ -21,6 +22,8 @@ func main() {
 		return
 	} else {
 		fmt.Println("DB connected")
+		account.Init(db)
+		service.Init(db)
 	}
 
 	serverInst := server.Server{

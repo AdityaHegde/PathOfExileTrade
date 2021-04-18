@@ -5,6 +5,8 @@ type UserRole int
 
 const (
   Admin UserRole = iota
-  Provider
-  Consumer
+  Owner = 5
+  Moderator = 15
+  Provider = 25
+  Consumer = 50
 )

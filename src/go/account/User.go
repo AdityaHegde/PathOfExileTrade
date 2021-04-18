@@ -9,10 +9,10 @@ import (
 
 // User is extended
 type User struct {
-	Name     string `jsonapi:"primary,users" gorm:"primaryKey"`
-	Email    string `jsonapi:"attr,email" gorm:"unique"`
-	Password string `jsonapi:"attr,password"`
-	Role     UserRole    `jsonapi:"attr,role"`
+	Name     string   `jsonapi:"primary,users" gorm:"primaryKey"`
+	Email    string   `jsonapi:"attr,email" gorm:"unique"`
+	Password string   `jsonapi:"attr,password"`
+	Role     UserRole `jsonapi:"attr,role"`
 }
 
 // UserContextKey is exported

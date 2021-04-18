@@ -11,7 +11,6 @@ export type UserContextType = {
 }
 
 export function useUserContext(): UserContextType {
-  const [userContextType, setUserContextType] = useState<UserContextType>({} as any);
   const history = useHistory();
 
   useEffect(() => {
@@ -48,6 +47,13 @@ export function useUserContext(): UserContextType {
   const signup = (userData: any) => {
     return authenticate(userData, "signup");
   };
+
+  const [userContextType, setUserContextType] = useState<UserContextType>({
+    user: null,
+    login,
+    signup,
+    logout,
+  });
 
   const setUserContextTypeWrapper = (user: User) => {
     setUserContextType({

@@ -2,6 +2,7 @@ const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const { getThemeVariables } = require('antd/dist/theme');
 
 module.exports = {
   mode: "development",
@@ -36,6 +37,10 @@ module.exports = {
         options: {
           lessOptions: {
             javascriptEnabled: true,
+            modifyVars: getThemeVariables({
+              dark: true,
+              compact: true,
+            }),
           },
         },
       }],

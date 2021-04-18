@@ -1,7 +1,9 @@
+import {UserRole} from "@model/UserRole";
+
 export class User {
   public name: string;
   public email: string;
-  public roles: Array<string>;
+  public roles: Array<UserRole>;
 
   constructor(userJson) {
     this.name = userJson.id;

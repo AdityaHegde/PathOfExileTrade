@@ -1,7 +1,7 @@
-package servicemodel
+package service
 
 import (
-  "github.com/AdityaHegde/PathOfExileTrade/account"
+	"github.com/AdityaHegde/PathOfExileTrade/account"
 )
 
 // Fulfillment is exported

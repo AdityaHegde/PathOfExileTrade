@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/go-redis/redis/v8 v8.7.1
-	github.com/google/jsonapi v0.0.0-20210403001043-c0ee6d2554c1 // indirect
+	github.com/google/jsonapi v0.0.0-20210403001043-c0ee6d2554c1
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
 	github.com/lestrrat-go/jwx v1.1.5

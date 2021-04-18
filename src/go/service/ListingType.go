@@ -1,40 +1,54 @@
 package service
 
 import (
-	servicemodel "github.com/AdityaHegde/PathOfExileTrade/model/service"
 	"gorm.io/gorm"
 )
 
-// CreateListingType is exported
-func CreateListingType(db *gorm.DB, listingTypeName string) error {
-	var listingType = servicemodel.ListingType{
-		Name:   listingTypeName,
-		Active: true,
-	}
-
-	res := db.Create(&listingType)
-
-	return res.Error
+// ListingType is exported
+type ListingType struct {
+	Name   string `jsonapi:"primary,users" gorm:"primaryKey"`
+	Active bool   `jsonapi:"attr,active" gorm:"index"`
 }
 
-// UpdateListingType is exported
-func UpdateListingType(
-	db *gorm.DB, listingType servicemodel.ListingType,
-) (*servicemodel.ListingType, error) {
-	res := db.Model(&listingType).Updates(listingType)
+// GetListingType is exported
+func GetListingType(db *gorm.DB, listingTypeName string) (*ListingType, error) {
+	var listingType ListingType
+
+	res := db.Find(&listingType, listingTypeName)
 
 	return &listingType, res.Error
 }
 
+// CreateListingType is exported
+func CreateListingType(db *gorm.DB, listingType *ListingType) (*ListingType, error) {
+	listingType.Active = true
+
+	res := db.Create(listingType)
+
+	return listingType, res.Error
+}
+
+// UpdateListingType is exported
+func UpdateListingType(db *gorm.DB, listingType *ListingType) (*ListingType, error) {
+	res := db.Model(listingType).Updates(listingType)
+
+	return listingType, res.Error
+}
+
 // GetAllListingType is exported
-func GetAllListingType(db *gorm.DB) (*[]servicemodel.ListingType, error) {
-	var listingTypes []servicemodel.ListingType
+func GetAllListingType(db *gorm.DB) (*[]ListingType, error) {
+	var listingTypes []ListingType
 
 	res := db.Find(&listingTypes)
 
-	if res.Error != nil {
-		return nil, res.Error
-	}
+	return &listingTypes, res.Error
+}
 
-	return &listingTypes, nil
+// GetAllActiveListingType is exported
+func GetAllActiveListingType(db *gorm.DB) (*[]ListingType, error) {
+	var listingTypes []ListingType
+
+	res := db.Find(&listingTypes, "active = ?", true)
+
+	return &listingTypes, res.Error
 }

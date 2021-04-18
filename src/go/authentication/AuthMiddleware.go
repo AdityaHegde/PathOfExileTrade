@@ -6,6 +6,7 @@ import (
   authcore "github.com/AdityaHegde/PathOfExileTrade/authentication/core"
   authstore "github.com/AdityaHegde/PathOfExileTrade/authentication/store"
   "github.com/google/jsonapi"
+  "github.com/gorilla/mux"
   "gorm.io/gorm"
   "net/http"
 )
@@ -114,14 +115,16 @@ func (authMiddleware *AuthMiddleware) Logout(next http.Handler) http.Handler {
   })
 }
 
-func (authMiddleware *AuthMiddleware) Restrict(next http.Handler, restrictedRole account.UserRole) http.Handler {
-  return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-    user := req.Context().Value(account.UserContextKey).(account.User)
+func (authMiddleware *AuthMiddleware) Restrict(restrictedRole account.UserRole) mux.MiddlewareFunc {
+  return func (next http.Handler) http.Handler {
+    return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+      user := req.Context().Value(account.UserContextKey).(account.User)
 
-    if user.Role <= restrictedRole {
-      next.ServeHTTP(res, req)
-    } else {
-      http.Error(res, "Forbidden", http.StatusForbidden)
-    }
-  })
+      if user.Role <= restrictedRole {
+        next.ServeHTTP(res, req)
+      } else {
+        http.Error(res, "Forbidden", http.StatusForbidden)
+      }
+    })
+  }
 }

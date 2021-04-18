@@ -6,14 +6,13 @@ import (
 	"github.com/AdityaHegde/PathOfExileTrade/account"
 	"strconv"
 
-	servicemodel "github.com/AdityaHegde/PathOfExileTrade/model/service"
 	"github.com/go-redis/redis/v8"
 )
 
 var ctx = context.Background()
 
 // AddToQueue is exported
-func AddToQueue(rdb *redis.Client, listingType *servicemodel.ListingType, user *account.User) {
+func AddToQueue(rdb *redis.Client, listingType *ListingType, user *account.User) {
 	if userAlreadyQueued(rdb, listingType, user) {
 		return
 	}
@@ -34,7 +33,7 @@ func AddToQueue(rdb *redis.Client, listingType *servicemodel.ListingType, user *
 }
 
 // RemoveFromQueue is exported
-func RemoveFromQueue(rdb *redis.Client, listingType *servicemodel.ListingType, user *account.User) {
+func RemoveFromQueue(rdb *redis.Client, listingType *ListingType, user *account.User) {
 	_, lRemErr := rdb.LRem(ctx, listingType.Name, 1, user.Name).Result()
 	_, sRemErr := rdb.SRem(ctx, listingType.Name, user.Name).Result()
 
@@ -49,25 +48,25 @@ func RemoveFromQueue(rdb *redis.Client, listingType *servicemodel.ListingType, u
 }
 
 // GetUsersForListing is exported
-func GetUsersForListing(rdb *redis.Client, listing *servicemodel.Listing) []string {
+func GetUsersForListing(rdb *redis.Client, listing *Listing) []string {
 	users := getNUsersFromQueue(rdb, &listing.ListingType, listing.MaxParticipants)
 	claimUsersForListing(rdb, listing, users)
 	return users
 }
 
 // ClearListing is exported
-func ClearListing(rdb *redis.Client, listing *servicemodel.Listing) {
+func ClearListing(rdb *redis.Client, listing *Listing) {
 	listingStrID := strconv.FormatUint(listing.ID, 10)
 	rdb.LTrim(ctx, listingStrID, 1, 0)
 }
 
-func userAlreadyQueued(rdb *redis.Client, listingType *servicemodel.ListingType, user *account.User) bool {
+func userAlreadyQueued(rdb *redis.Client, listingType *ListingType, user *account.User) bool {
 	exists, err := rdb.SIsMember(ctx, listingType.Name, user.Name).Result()
 
 	return err == redis.Nil || exists
 }
 
-func getNUsersFromQueue(rdb *redis.Client, listingType *servicemodel.ListingType, num uint) []string {
+func getNUsersFromQueue(rdb *redis.Client, listingType *ListingType, num uint) []string {
 	var users []string = make([]string, num)
 
 	for i := 0; i < int(num); i++ {
@@ -77,7 +76,7 @@ func getNUsersFromQueue(rdb *redis.Client, listingType *servicemodel.ListingType
 	return users
 }
 
-func getUserFromQueue(rdb *redis.Client, listingType *servicemodel.ListingType) string {
+func getUserFromQueue(rdb *redis.Client, listingType *ListingType) string {
 	user, lPopErr := rdb.LPop(ctx, listingType.Name).Result()
 
 	if lPopErr != nil {
@@ -94,7 +93,7 @@ func getUserFromQueue(rdb *redis.Client, listingType *servicemodel.ListingType) 
 	return user
 }
 
-func claimUsersForListing(rdb *redis.Client, listing *servicemodel.Listing, users []string) {
+func claimUsersForListing(rdb *redis.Client, listing *Listing, users []string) {
 	listingStrID := strconv.FormatUint(listing.ID, 10)
 
 	len, lLenErr := rdb.LLen(ctx, listingStrID).Result()

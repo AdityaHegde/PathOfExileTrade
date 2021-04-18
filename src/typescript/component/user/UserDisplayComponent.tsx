@@ -1,13 +1,13 @@
-import * as React from "React";
+import * as React from "react";
 import { UserContext } from "./UserContext";
 import {useContext} from "react";
+import {Button} from "antd";
 
 export function  UserDisplayComponent() {
   const userContext = useContext(UserContext);
   return (
     <>
-      <div>{userContext.user.name}</div>
-      <button onClick={userContext.logout}>Logout</button>
+      {userContext.user.name} <Button type="link" onClick={userContext.logout}>Logout</Button>
     </>
   )
 }

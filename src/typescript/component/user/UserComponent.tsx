@@ -1,5 +1,4 @@
-import * as React from "React";
-import { Link } from "react-router-dom";
+import * as React from "react";
 import {UserDisplayComponent} from "./UserDisplayComponent";
 import { UserContext } from "./UserContext";
 import {useContext} from "react";
@@ -8,6 +7,6 @@ export function UserComponent() {
   const userContext = useContext(UserContext);
 
   return (
-    <>{userContext.user ? <UserDisplayComponent /> : <Link to="/login">Login</Link>}</>
+    <div >{userContext.user ? <UserDisplayComponent /> : <a href="/login">Login</a>}</div>
   );
 }

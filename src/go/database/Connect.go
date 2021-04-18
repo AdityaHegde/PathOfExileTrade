@@ -1,7 +1,6 @@
 package database
 
 import (
-	"github.com/AdityaHegde/PathOfExileTrade/account"
 	poeormmodel "github.com/AdityaHegde/PathOfExileTrade/model/orm/poe"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -22,7 +21,6 @@ func Connect() (*gorm.DB, error) {
 	db.AutoMigrate(&poeormmodel.Property{})
 	db.AutoMigrate(&poeormmodel.PropertyValue{})
 	db.AutoMigrate(&poeormmodel.StashTab{})
-	db.AutoMigrate(&account.User{})
 
 	return db, nil
 }
